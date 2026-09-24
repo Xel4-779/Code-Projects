@@ -1,0 +1,9 @@
+1.   Adauga o functionalitate de fisier loca!
+
+Parolele sunt salvate local sub un alias.
+Aliasul este practic un manager de parole , daca esti conectat la un alias local poti sa deblochezi toate parolele pt toate conturile din acel alias
+
+2.   Incripteaza Aliasul
+
+
+3. Vezi daca poti incripta toate parolele si sa le intorci asa cum erau.
