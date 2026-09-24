@@ -1,13 +1,23 @@
 import getpass
-import hashlib
+
 import json
 from pathlib import Path
-
+from cryptography.fernet import Fernet
 
 DATA_FILE = Path(__file__).with_name("passwords.json")
+KEY_FILE = Path(__file__).with_name("secret.key")
 
 password_manager = {}
 
+
+def return_key():
+    if KEY_FILE.exists():
+        return KEY_FILE.read_bytes()
+    else:
+        key = Fernet.generate_key()
+        KEY_FILE.write_bytes(key)
+        return key
+        
 
 def load_passwords():
     global password_manager
@@ -21,13 +31,17 @@ def save_passwords():
     with DATA_FILE.open("w", encoding="utf-8") as file:
         json.dump(  password_manager , file , indent = 4  )
 
+key = return_key()
+cipher = Fernet(key)
 
 
 def create_account():
+      
+
     username = input("Enter a username: ")
     password = getpass.getpass("Enter a password: ")
 
-    password_manager[username] = password
+    password_manager[username] = cipher.encrypt(password.encode()).decode()
     print("----------------------------------------------")
 
     save_passwords()
@@ -37,10 +51,10 @@ def create_account():
 def login():
     username = input("Enter your username: ")
     
-    password = getpass.getpass("Enter your password: ")
-    
+    password = getpass.getpass("Enter your password: ") 
+    encrypted_password =cipher.encrypt(password.encode()).decode()
 
-    if username in password_manager and password_manager[username] == password:
+    if username in password_manager and password_manager[username] == encrypted_password:
         
         print("Login successful!")
         print("----------------------------------------------")
@@ -64,6 +78,17 @@ def change_password():
     else:
         print("Username or password is incorrect.")
         print("----------------------------------------------")
+
+
+def decode_password_from( current_account ):
+    if password_manager[current_account] != None:
+
+        password =password_manager[current_account]
+        decrypted_password = cipher.decrypt(password.encode()).decode()
+        print(decrypted_password)
+
+    else:
+        print("Nonexisting account")
 
 
 def main():
@@ -100,6 +125,8 @@ def main():
                 change_password()
             case _:
                 break
+
+
 
 
 if __name__ == "__main__":
