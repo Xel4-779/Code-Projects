@@ -7,6 +7,7 @@ from cryptography.fernet import Fernet
 DATA_FILE = Path(__file__).with_name("passwords.json")
 KEY_FILE = Path(__file__).with_name("secret.key")
 
+parent_accounts = {}
 password_manager = {}
 
 
@@ -14,9 +15,9 @@ def return_key():
     if KEY_FILE.exists():
         return KEY_FILE.read_bytes()
     else:
-        key = Fernet.generate_key()
-        KEY_FILE.write_bytes(key)
-        return key
+        new_key = Fernet.generate_key()
+        KEY_FILE.write_bytes(new_key)
+        return new_key
         
 
 def load_passwords():
@@ -52,7 +53,7 @@ def login():
     username = input("Enter your username: ")
     
     password = getpass.getpass("Enter your password: ") 
-    encrypted_password =cipher.encrypt(password.encode()).decode()
+    encrypted_password = cipher.encrypt(password.encode()).decode()
 
     if username in password_manager and password_manager[username] == encrypted_password:
         
@@ -65,9 +66,12 @@ def login():
 def change_password():
     username = input("Enter your username: ")
     password = getpass.getpass("Enter your current password: ")
-    if username in password_manager and password_manager[username] == password:
+    encrypted_password = cipher.encrypt(password.encode()).decode()
+
+
+    if username in password_manager and password_manager[username] == encrypted_password:
         new_password = getpass.getpass("Enter your new password: ")
-        password_manager[username] = new_password
+        password_manager[username] = cipher.encrypt(new_password.encode()).decode()
 
 
         save_passwords()
@@ -91,6 +95,19 @@ def decode_password_from( current_account ):
         print("Nonexisting account")
 
 
+def retrieve_all_passwords():
+    print("----------------------------------------------")
+    print("Currently stored passwords, there are " + str(len(password_manager)) + " accounts stored: ")
+    i = 1
+    for account in password_manager:
+        decrypted_password = cipher.decrypt(password_manager[account].encode()).decode()
+        print(str(i) + ". " + account[:1].upper() + account[1:] + " : " + decrypted_password)
+        i += 1
+
+    print("----------------------------------These are all the passwords stored.")
+
+
+
 def main():
 
     load_passwords()
@@ -101,10 +118,9 @@ def main():
         print("\nPassword Manager")
         print("1. Create Account")
         print("2. Login")
-
-        print("4. Retrieve All Passwords")
-        print("5. Change Password")
-
+        print("3. Retrieve Password")
+        print("4. Change Password")
+        print("5. Retrieve All Passwords")
 
         print("Any other key to exit")
         print("----------------------------------------------")
@@ -117,12 +133,12 @@ def main():
                 create_account()
             case '2':
                 login()
+            case '3':
+                decode_password_from(input("Enter the username to retrieve the password: "))
             case '4':
-                load_passwords()
-                for username in password_manager:
-                    print(f" Username: {username}, Password: {password_manager[username]}")
-            case '5':
                 change_password()
+            case '5':
+                retrieve_all_passwords()
             case _:
                 break
 
