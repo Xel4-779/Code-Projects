@@ -1,5 +1,4 @@
 import getpass
-
 import json
 from pathlib import Path
 from cryptography.fernet import Fernet
@@ -7,7 +6,7 @@ from cryptography.fernet import Fernet
 DATA_FILE = Path(__file__).with_name("passwords.json")
 KEY_FILE = Path(__file__).with_name("secret.key")
 
-parent_accounts = {}
+
 password_manager = {}
 
 
