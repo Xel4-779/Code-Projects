@@ -21,7 +21,7 @@ def return_key():
 
 def load_passwords():
     global password_manager
-
+    
     if DATA_FILE.exists():
         with DATA_FILE.open("r", encoding="utf-8") as file:
             password_manager = json.load(file)
@@ -50,17 +50,29 @@ def create_account():
 
 def login():
     username = input("Enter your username: ")
+
+    true_password = password_manager.get(username)
+
+    if true_password == None:
+        print("Nonexisting password!")
+        print("-------------------------------")
+        return
     
     password = getpass.getpass("Enter your password: ") 
-    encrypted_password = cipher.encrypt(password.encode()).decode()
 
-    if username in password_manager and password_manager[username] == encrypted_password:
+    decoded_password = cipher.decrypt(true_password.encode()).decode()
+
+    if username in password_manager and password == true_password:
         
         print("Login successful!")
         print("----------------------------------------------")
     else:
-        print("Invalid username or password.")
+        print("Invalid password.")
         print("----------------------------------------------")
+
+
+
+
 
 def change_password():
     username = input("Enter your username: ")
