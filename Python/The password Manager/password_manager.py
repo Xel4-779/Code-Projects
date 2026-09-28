@@ -1,23 +1,45 @@
 import getpass
 import json
+import os
+import base64
+
 from pathlib import Path
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+
 
 DATA_FILE = Path(__file__).with_name("passwords.json")
 KEY_FILE = Path(__file__).with_name("secret.key")
+SALT_FILE = Path(__file__).with_name("salt.bin")
 
 
 password_manager = {}
+cipher = None
 
 
-def return_key():
-    if KEY_FILE.exists():
-        return KEY_FILE.read_bytes()
+def random_salt():
+    if SALT_FILE.exists() :
+        return SALT_FILE.read_bytes()
     else:
-        new_key = Fernet.generate_key()
-        KEY_FILE.write_bytes(new_key)
-        return new_key
-        
+        salt = os.urandom(16)
+        SALT_FILE.write_bytes(salt)
+        return salt
+
+def derive_key(master_password):
+    
+    kdf = PBKDF2HMAC(
+    algorithm= hashes.SHA256(),
+    length=32,
+    salt = random_salt(),
+    iterations=600_000,
+    )
+
+
+
+    key = kdf.derive(master_password.encode())
+    return base64.urlsafe_b64encode(key)
+    
 
 def load_passwords():
     global password_manager
@@ -31,10 +53,9 @@ def save_passwords():
     with DATA_FILE.open("w", encoding="utf-8") as file:
         json.dump(  password_manager , file , indent = 4  )
 
-key = return_key()
-cipher = Fernet(key)
 
 
+# Function 1 create account - tested
 def create_account():
       
 
@@ -47,11 +68,13 @@ def create_account():
     save_passwords()
 
 
-
+#Function 2 login - tested
 def login():
     username = input("Enter your username: ")
 
     true_password = password_manager.get(username)
+
+    print(true_password)
 
     if true_password == None:
         print("Nonexisting username!")
@@ -61,6 +84,8 @@ def login():
     password = getpass.getpass("Enter your password: ") 
 
     decoded_password = cipher.decrypt(true_password.encode()).decode()
+    
+    
 
     if password == decoded_password:
 
@@ -70,10 +95,7 @@ def login():
         print("Invalid password.")
         print("----------------------------------------------")
 
-
-
-
-
+#Function 3 change a password
 def change_password():
     username = input("Enter your username: ")
     password = getpass.getpass("Enter your current password: ")
@@ -120,11 +142,17 @@ def retrieve_all_passwords():
 
 
 def main():
+    global cipher 
 
     load_passwords()
 
+    master_password = getpass.getpass("Enter the master Password:   ")
+    
+    
+    cipher = Fernet(derive_key(master_password))
 
     while True:
+        
         print("----------------------------------------------")
 
         print("\nPassword Manager")
@@ -159,3 +187,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
