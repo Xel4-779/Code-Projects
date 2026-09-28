@@ -54,7 +54,7 @@ def login():
     true_password = password_manager.get(username)
 
     if true_password == None:
-        print("Nonexisting password!")
+        print("Nonexisting username!")
         print("-------------------------------")
         return
     
@@ -62,7 +62,7 @@ def login():
 
     decoded_password = cipher.decrypt(true_password.encode()).decode()
 
-    if username in password_manager and password == decoded_password:
+    if password == decoded_password:
 
         print("Login successful!")
         print("----------------------------------------------")
@@ -77,10 +77,10 @@ def login():
 def change_password():
     username = input("Enter your username: ")
     password = getpass.getpass("Enter your current password: ")
-    encrypted_password = cipher.encrypt(password.encode()).decode()
+    decrypted_password = cipher.decrypt(password_manager[username].encode()).decode()
 
 
-    if username in password_manager and password_manager[username] == encrypted_password:
+    if username in password_manager and decrypted_password == password:
         new_password = getpass.getpass("Enter your new password: ")
         password_manager[username] = cipher.encrypt(new_password.encode()).decode()
 
@@ -96,7 +96,7 @@ def change_password():
 
 
 def decode_password_from( current_account ):
-    if password_manager[current_account] != None:
+    if password_manager.get(current_account) != None:
 
         password =password_manager[current_account]
         decrypted_password = cipher.decrypt(password.encode()).decode()
