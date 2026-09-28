@@ -62,11 +62,11 @@ def login():
 
     decoded_password = cipher.decrypt(true_password.encode()).decode()
 
-    if username in password_manager and password == true_password:
-        
+    if username in password_manager and password == decoded_password:
+
         print("Login successful!")
         print("----------------------------------------------")
-    else:
+    else:   
         print("Invalid password.")
         print("----------------------------------------------")
 
@@ -122,6 +122,7 @@ def retrieve_all_passwords():
 def main():
 
     load_passwords()
+
 
     while True:
         print("----------------------------------------------")
