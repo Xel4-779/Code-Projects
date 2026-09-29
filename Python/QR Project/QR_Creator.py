@@ -11,7 +11,7 @@ import qrcode
 
 def create_qr():
     data = entry.get("1.0", "end-1c").strip()
-    
+
     if not data:
         messagebox.showwarning("Missing content", "Enter text or a URL first.")
         return
