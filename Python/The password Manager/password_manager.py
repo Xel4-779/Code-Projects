@@ -10,7 +10,6 @@ from cryptography.hazmat.primitives import hashes
 
 
 DATA_FILE = Path(__file__).with_name("passwords.json")
-KEY_FILE = Path(__file__).with_name("secret.key")
 SALT_FILE = Path(__file__).with_name("salt.bin")
 
 
@@ -93,14 +92,35 @@ def login():
         print("Invalid password.")
         print("----------------------------------------------")
 
-#Function 3 change a password
+
+
+#Function 3 change a password -tested
+def decode_password_from( current_account ):
+    if password_manager.get(current_account) != None:
+
+        password =password_manager[current_account]
+        decrypted_password = cipher.decrypt(password.encode()).decode()
+        print(decrypted_password)
+
+    else:
+        print("Nonexisting account")
+        return
+
+
+#Function 4 decode a password from a given account - tested
 def change_password():
     username = input("Enter your username: ")
-    password = getpass.getpass("Enter your current password: ")
-    decrypted_password = cipher.decrypt(password_manager[username].encode()).decode()
+    
 
+    if username not in password_manager:
+        print("Username does not exist.")
+        print("----------------------------------------------")
+        return
+    else:
+        password = getpass.getpass("Enter your current password: ")
+        decrypted_password = cipher.decrypt(password_manager[username].encode()).decode()
 
-    if username in password_manager and decrypted_password == password:
+    if decrypted_password == password:
         new_password = getpass.getpass("Enter your new password: ")
         password_manager[username] = cipher.encrypt(new_password.encode()).decode()
 
@@ -115,17 +135,8 @@ def change_password():
         print("----------------------------------------------")
 
 
-def decode_password_from( current_account ):
-    if password_manager.get(current_account) != None:
 
-        password =password_manager[current_account]
-        decrypted_password = cipher.decrypt(password.encode()).decode()
-        print(decrypted_password)
-
-    else:
-        print("Nonexisting account")
-
-
+#Function 5 retrieve all passwords -tested
 def retrieve_all_passwords():
     print("----------------------------------------------")
     print("Currently stored passwords, there are " + str(len(password_manager)) + " accounts stored: ")
