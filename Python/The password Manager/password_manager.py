@@ -4,7 +4,7 @@ import os
 import base64
 
 from pathlib import Path
-from cryptography.fernet import Fernet, InvalidToken
+from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 
@@ -73,8 +73,6 @@ def login():
     username = input("Enter your username: ")
 
     true_password = password_manager.get(username)
-
-    print(true_password)
 
     if true_password == None:
         print("Nonexisting username!")
